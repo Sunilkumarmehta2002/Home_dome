@@ -205,3 +205,156 @@ document.addEventListener("DOMContentLoaded", function() {
     // 3. Trigger App Popup (Delay 2s for better UX)
     setTimeout(showAppPopup, 2000);
 });
+
+
+// =========================================
+// 8. SHOPPING CART & PAYMENT SYSTEM
+// =========================================
+
+// Cart State
+let cart = [];
+const RAZORPAY_KEY_ID = 'YOUR_RAZORPAY_KEY_ID'; // <--- PUT YOUR KEY HERE
+
+function addToCart(name, price) {
+    // Check if item exists
+    const existingItem = cart.find(item => item.name === name);
+    if(existingItem) {
+        existingItem.qty++;
+    } else {
+        cart.push({ name: name, price: price, qty: 1 });
+    }
+    updateCartUI();
+    showToast(`Added ${name} to cart`);
+    
+    // Animate Cart Icon
+    const floatBtn = document.querySelector('.cart-float');
+    floatBtn.style.transform = 'scale(1.2)';
+    setTimeout(() => floatBtn.style.transform = 'scale(1)', 200);
+}
+
+function updateCartUI() {
+    const container = document.getElementById('cart-items-container');
+    const totalEl = document.getElementById('cart-total');
+    const btnTotalEl = document.getElementById('btn-pay-amt');
+    const countBadge = document.getElementById('cart-count');
+
+    // 1. Calculate Totals
+    let total = 0;
+    let count = 0;
+    cart.forEach(item => {
+        total += item.price * item.qty;
+        count += item.qty;
+    });
+
+    // 2. Update HTML
+    countBadge.innerText = count;
+    totalEl.innerText = '₹' + total;
+    btnTotalEl.innerText = '₹' + total;
+
+    // 3. Render Items
+    if(cart.length === 0) {
+        container.innerHTML = '<div class="empty-cart-msg">Your cart is empty. Add some snacks!</div>';
+        return;
+    }
+
+    container.innerHTML = cart.map((item, index) => `
+        <div class="cart-item-row">
+            <div>
+                <div class="item-name">${item.name}</div>
+                <div style="font-size:0.8rem; color:#666;">₹${item.price} x ${item.qty}</div>
+            </div>
+            <div class="item-controls">
+                <button class="qty-btn" onclick="updateQty(${index}, -1)">-</button>
+                <span style="color:#fff; font-size:0.9rem; width:20px; text-align:center;">${item.qty}</span>
+                <button class="qty-btn" onclick="updateQty(${index}, 1)">+</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function updateQty(index, change) {
+    if(cart[index].qty + change <= 0) {
+        cart.splice(index, 1);
+    } else {
+        cart[index].qty += change;
+    }
+    updateCartUI();
+}
+
+function toggleCart() {
+    const modal = document.getElementById('cart-modal');
+    modal.classList.toggle('active');
+}
+
+// =========================================
+// 9. PAYMENT INTEGRATION
+// =========================================
+function processPayment() {
+    // 1. Validation
+    if(cart.length === 0) return showToast("Cart is empty!");
+    
+    const name = document.getElementById('cust-name').value;
+    const phone = document.getElementById('cust-phone').value;
+    const hostel = document.getElementById('cust-hostel').value;
+    const room = document.getElementById('cust-room').value;
+
+    if(!name || !phone || !room) {
+        alert("Please fill in all delivery details.");
+        return;
+    }
+
+    // 2. Calculate Total Amount (Razorpay expects amount in paise)
+    let totalAmount = 0;
+    cart.forEach(item => totalAmount += (item.price * item.qty));
+    
+    // 3. Create Options
+    var options = {
+        "key": d1GNpp5lXUPICl43XG2D0L6u, 
+        "amount": totalAmount * 100, // Amount in paise
+        "currency": "INR",
+        "name": "Home-Dome",
+        "description": "Snack Order Payment",
+        "image": "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=200&q=80",
+        "handler": function (response){
+            // SUCCESS HANDLER
+            console.log(response.razorpay_payment_id);
+            paymentSuccess(response.razorpay_payment_id, totalAmount, {name, phone, hostel, room});
+        },
+        "prefill": {
+            "name": name,
+            "contact": phone
+        },
+        "theme": {
+            "color": "#f59e0b"
+        }
+    };
+
+    var rzp1 = new Razorpay(options);
+    rzp1.on('payment.failed', function (response){
+        alert("Payment Failed: " + response.error.description);
+    });
+    rzp1.open();
+}
+
+function paymentSuccess(paymentId, amount, details) {
+    // Here you would typically send this data to your backend
+    // Since we are serverless, we will construct a WhatsApp message
+    
+    const orderItems = cart.map(i => `${i.name} x${i.qty}`).join(', ');
+    
+    const msg = `*NEW ORDER PAID* ✅%0A` +
+                `*ID:* ${paymentId}%0A` +
+                `*Amt:* ₹${amount}%0A` +
+                `*Items:* ${orderItems}%0A` +
+                `----------------%0A` +
+                `*Name:* ${details.name}%0A` +
+                `*Loc:* ${details.hostel} - ${details.room}%0A` +
+                `*Phone:* ${details.phone}`;
+                
+    toggleCart();
+    cart = []; // Clear cart
+    updateCartUI();
+    
+    // Redirect to WhatsApp with Order Details
+    window.location.href = `https://wa.me/917297810859?text=${msg}`;
+}

@@ -16,9 +16,12 @@
     
     <script src="https://unpkg.com/lucide@latest"></script>
 
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
     <link rel="stylesheet" href="style.css">
 
     <style>
+        /* HTML Specific Overrides for Premium Cards */
         .ny-card {
             margin-top: 3rem;
             position: relative;
@@ -61,35 +64,22 @@
         }
 
         .ny-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
+            display: inline-flex; align-items: center; gap: 10px;
             background: rgba(16, 185, 129, 0.15);
-            border: 1px solid #10b981;
-            color: #10b981;
-            padding: 10px 24px;
-            border-radius: 50px;
-            font-family: 'Rajdhani', sans-serif;
-            font-weight: 700;
-            font-size: 0.9rem;
-            letter-spacing: 1px;
+            border: 1px solid #10b981; color: #10b981;
+            padding: 10px 24px; border-radius: 50px;
+            font-family: 'Rajdhani', sans-serif; font-weight: 700;
+            font-size: 0.9rem; letter-spacing: 1px;
             box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
             transition: transform 0.3s;
         }
         .ny-badge:hover {
             transform: scale(1.05);
-            background: rgba(16, 185, 129, 0.25);
-            color: white;
+            background: rgba(16, 185, 129, 0.25); color: white;
         }
 
         /* Sparkle Animation */
-        .sparkle {
-            position: absolute;
-            color: #f59e0b;
-            font-size: 1.5rem;
-            opacity: 0;
-            animation: floatSparkle 3s ease-in-out infinite;
-        }
+        .sparkle { position: absolute; color: #f59e0b; font-size: 1.5rem; opacity: 0; animation: floatSparkle 3s ease-in-out infinite; }
         .s1 { top: 15%; left: 10%; animation-delay: 0s; }
         .s2 { bottom: 20%; right: 10%; animation-delay: 1.5s; font-size: 2rem; }
         .s3 { top: 20%; right: 20%; animation-delay: 0.5s; font-size: 1rem; color: #fff; }
@@ -105,15 +95,13 @@
 
     <div id="app-modal" class="app-modal-overlay">
         <div class="app-modal">
-            <button class="app-close" onclick="document.getElementById('app-modal').style.display='none'">×</button>
-            
+            <button class="app-close" onclick="closeAppModal()">×</button>
             <div class="icon-pulse-wrapper">
                 <div class="icon-pulse-circle"></div>
                 <div style="width: 70px; height: 70px; background: rgba(255,255,255,0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--accent); border: 1px solid var(--accent);">
                     <i data-lucide="smartphone" size="36"></i>
                 </div>
             </div>
-
             <h3 class="rajdhani" style="font-size: 1.8rem; margin-bottom: 0.5rem; color: #fff;">SYSTEM UPGRADE</h3>
             <p style="color: #bbb; font-size: 0.95rem; line-height: 1.5; margin-bottom: 0.5rem;">
                 The web is good. The app is <strong>faster</strong>.
@@ -123,7 +111,6 @@
                 <li style="margin-bottom: 8px; display:flex; align-items:center; gap:10px;"><i data-lucide="clock" size="14" style="color:var(--accent)"></i> Order Tracking</li>
                 <li style="display:flex; align-items:center; gap:10px;"><i data-lucide="percent" size="14" style="color:var(--accent)"></i> App-only Coupons</li>
             </ul>
-
             <a href="https://median.co/share/lppardl#apk" target="_blank" class="btn-app-dl">
                 <i data-lucide="download" size="22"></i> INSTALL APP
             </a>
@@ -142,6 +129,68 @@
 
     <div class="bg-canvas" id="dynamic-bg"></div>
 
+    <div class="cart-float" onclick="toggleCart()">
+        <div class="cart-count-badge" id="cart-count">0</div>
+        <i data-lucide="shopping-bag" size="24"></i>
+    </div>
+
+    <div class="cart-modal-overlay" id="cart-modal">
+        <div class="cart-modal">
+            <div class="cart-header">
+                <h3 class="rajdhani">YOUR ORDER</h3>
+                <button class="close-cart" onclick="toggleCart()">×</button>
+            </div>
+    
+            <div class="cart-body" id="cart-items-container">
+                <div class="empty-cart-msg">Your cart is empty. add some snacks!</div>
+            </div>
+    
+            <div class="cart-summary">
+                <div class="summary-row" style="padding: 0 20px; display:flex; justify-content:space-between; font-weight:bold; color:var(--accent);">
+                    <span>Total Amount</span> <span id="cart-total">₹0</span>
+                </div>
+            </div>
+    
+            <div class="checkout-form">
+                <h4 class="rajdhani" style="margin-bottom:15px; color:#fff; display:flex; align-items:center; gap:8px;">
+                    <i data-lucide="map-pin" size="16"></i> DELIVERY DETAILS
+                </h4>
+                <div class="input-group">
+                    <input type="text" id="cust-name" placeholder=" " required>
+                    <label>Full Name</label>
+                </div>
+                <div class="input-group">
+                    <input type="tel" id="cust-phone" placeholder=" " required>
+                    <label>Phone Number (WhatsApp)</label>
+                </div>
+                <div class="row-inputs">
+                    <div class="input-group">
+                        <select id="cust-hostel">
+                            <option value="" disabled selected>Select Hostel</option>
+                            <option value="BH1">BH 1</option>
+                            <option value="BH2">BH 2</option>
+                            <option value="BH3">BH 3</option>
+                            <option value="BH4">BH 4</option>
+                            <option value="GH">GH (Girls Hostel)</option>
+                            <option value="LAW_GATE">Law Gate Pickup</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="cust-room" placeholder=" " required>
+                        <label>Room No.</label>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="cart-footer">
+                <button class="btn-pay" onclick="processPayment()">
+                    <span>PROCEED TO PAY</span>
+                    <span id="btn-pay-amt">₹0</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <a href="https://wa.me/917297810859?text=Hi%20Provertos,%20I%20am%20excited%20about%20the%20launch" class="whatsapp-float">
         <i data-lucide="message-circle" size="28"></i>
     </a>
@@ -150,7 +199,6 @@
         <div class="pulse-dot"></div>
         <span id="ticker-text">Loading network activity...</span>
     </div>
-
     <div id="toast-box"><i data-lucide="bell" size="18"></i> <span id="toast-msg">Notification</span></div>
 
     <nav>
@@ -248,7 +296,7 @@
                         <p class="menu-desc">The classic Kota filling with hing & spices. Served with green chutney.</p>
                         <div class="menu-footer">
                             <span class="menu-price">₹15</span>
-                            <button class="btn-add" onclick="scrollToForm()">ADD +</button>
+                            <button class="btn-add" onclick="addToCart('Spicy Samosa', 15)">ADD +</button>
                         </div>
                     </div>
                 </div>
@@ -263,7 +311,7 @@
                         <p class="menu-desc">Crispy, flaky, and stuffed with spicy moong dal filling.</p>
                         <div class="menu-footer">
                             <span class="menu-price">₹25</span>
-                            <button class="btn-add" onclick="scrollToForm()">ADD +</button>
+                            <button class="btn-add" onclick="addToCart('Khasta Kachori', 25)">ADD +</button>
                         </div>
                     </div>
                 </div>
@@ -277,7 +325,7 @@
                         <p class="menu-desc">Mumbai style potato fritter. Hot and fulfilling.</p>
                         <div class="menu-footer">
                             <span class="menu-price">₹25</span>
-                            <button class="btn-add" onclick="scrollToForm()">ADD +</button>
+                            <button class="btn-add" onclick="addToCart('Aloo Vada', 25)">ADD +</button>
                         </div>
                     </div>
                 </div>
@@ -291,7 +339,7 @@
                         <p class="menu-desc">Stuffed with spicy potato mix, deep fried to golden perfection.</p>
                         <div class="menu-footer">
                             <span class="menu-price">₹30</span>
-                            <button class="btn-add" onclick="scrollToForm()">ADD +</button>
+                            <button class="btn-add" onclick="addToCart('Bread Pakoda', 30)">ADD +</button>
                         </div>
                     </div>
                 </div>
@@ -305,7 +353,7 @@
                         <p class="menu-desc">Onion, Gobhi, and Palak pakodas. Perfect for winter evenings.</p>
                         <div class="menu-footer">
                             <span class="menu-price">₹50</span>
-                            <button class="btn-add" onclick="scrollToForm()">ADD +</button>
+                            <button class="btn-add" onclick="addToCart('Mix Pakoda Plate', 50)">ADD +</button>
                         </div>
                     </div>
                 </div>
@@ -319,7 +367,7 @@
                         <p class="menu-desc">Crispy aloo tikki, fresh onions, tomatoes and special sauce.</p>
                         <div class="menu-footer">
                             <span class="menu-price">₹60</span>
-                            <button class="btn-add" onclick="scrollToForm()">ADD +</button>
+                            <button class="btn-add" onclick="addToCart('Desi Veg Burger', 60)">ADD +</button>
                         </div>
                     </div>
                 </div>
@@ -333,7 +381,7 @@
                         <p class="menu-desc">Loaded with veggies and grilled until crispy.</p>
                         <div class="menu-footer">
                             <span class="menu-price">₹70</span>
-                            <button class="btn-add" onclick="scrollToForm()">ADD +</button>
+                            <button class="btn-add" onclick="addToCart('Grilled Sandwich', 70)">ADD +</button>
                         </div>
                     </div>
                 </div>
@@ -348,7 +396,7 @@
                         <p class="menu-desc">Loaded with mozzarella and liquid cheese blend.</p>
                         <div class="menu-footer">
                             <span class="menu-price">₹149</span>
-                            <button class="btn-add" onclick="scrollToForm()">ADD +</button>
+                            <button class="btn-add" onclick="addToCart('Cheese Pizza 6in', 149)">ADD +</button>
                         </div>
                     </div>
                 </div>
@@ -360,10 +408,10 @@
                     </div>
                     <div class="menu-body">
                         <div class="menu-title">THE WINTER COMBO</div>
-                            <p class="menu-desc">1 Samosa + 1 Kachori + 1 Bread Pakoda + 1 Burger. Ultimate survival kit./ Customize for you self</p>
+                            <p class="menu-desc">1 Samosa + 1 Kachori + 1 Bread Pakoda + 1 Burger. Ultimate survival kit.</p>
                             <div class="menu-footer">
                             <span class="menu-price">₹111</span>
-                            <button class="btn-add" onclick="scrollToForm()">ADD +</button>
+                            <button class="btn-add" onclick="addToCart('Winter Survival Combo', 111)">ADD +</button>
                         </div>
                     </div>
                 </div>
@@ -375,12 +423,12 @@
                 </div> 
 
                 <div class="action-btn-container">
-                    <a href="#snack-form-frame" class="action-btn btn-form-trigger">
-                        <i data-lucide="file-text" size="20"></i> FILL FORM
+                    <a href="https://wa.me/917297810859?text=Hi%20Provertos%2C%20I%20have%20an%20issue%20with%20my%20order." target="_blank" class="action-btn btn-whatsapp-trigger" style="width: 100%;">
+                        <i data-lucide="message-circle" size="20"></i> CONTACT SUPPORT (WHATSAPP)
                     </a>
-                    <a href="https://wa.me/917297810859?text=Hi%20Provertos%2C%20I%20want%20to%20place%20an%20INSTANT%20ORDER%20for%20snacks." target="_blank" class="action-btn btn-whatsapp-trigger">
-                        <i data-lucide="message-circle" size="20"></i> INSTANT ORDER
-                    </a>
+
+                    <div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><span style="font-size:0.7rem; color:#aaa;">INSTANT_ORDER_UPLINK.exe</span></div>
+                <iframe id="snack-form-frame" class="form-embed" src="https://xzekniku.formester.com/f/7MoDlvgwd"></iframe>
                 </div>
                 
                 <div class="community-box" style="margin-bottom: 3rem;">
@@ -394,9 +442,6 @@
                         </a>
                     </div>
                 </div>
-
-                <div class="terminal-header"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><span style="font-size:0.7rem; color:#aaa;">INSTANT_ORDER_UPLINK.exe</span></div>
-                <iframe id="snack-form-frame" class="form-embed" src="https://xzekniku.formester.com/f/7MoDlvgwd"></iframe>
             </div>
 
             <div style="margin-top: 3rem;">
@@ -441,7 +486,7 @@
                         <p class="menu-desc">1/2 Kg Choice Cake + 2 Snow Sprays + Pop-Pops + Candles + Birthday Sash/Cap. Instant Party.</p>
                         <div class="menu-footer">
                             <span class="menu-price">₹899</span>
-                            <button class="btn-add" onclick="scrollToForm()">ADD +</button>
+                            <button class="btn-add" onclick="addToCart('Ultimate Party Combo', 899)">ADD +</button>
                         </div>
                     </div>
                 </div>
@@ -456,7 +501,7 @@
                         <p class="menu-desc">Don't cut it, SMASH it! Hard chocolate shell with cake & chocolates inside. Includes wooden hammer.</p>
                         <div class="menu-footer">
                             <span class="menu-price">₹799</span>
-                            <button class="btn-add" onclick="scrollToForm()">ADD +</button>
+                            <button class="btn-add" onclick="addToCart('Heart Pinata Cake', 799)">ADD +</button>
                         </div>
                     </div>
                 </div>
@@ -471,7 +516,7 @@
                         <p class="menu-desc">Send us your friend's weirdest photo, and we'll print it on the cake. 100% edible sheet.</p>
                         <div class="menu-footer">
                             <span class="menu-price">₹999 (1/2 kg)</span>
-                            <button class="btn-add" onclick="scrollToForm()">ADD +</button>
+                            <a href="#cake-form-frame" style="text-decoration:none;" class="btn-add">CUSTOMIZE</a>
                         </div>
                     </div>
                 </div>
@@ -485,7 +530,7 @@
                         <p class="menu-desc">Dense, fudge-like dark chocolate cake. No cream, just pure chocolate indulgence.</p>
                         <div class="menu-footer">
                             <span class="menu-price">₹799 (1/2 kg)</span>
-                            <button class="btn-add" onclick="scrollToForm()">ADD +</button>
+                            <button class="btn-add" onclick="addToCart('Death By Chocolate', 799)">ADD +</button>
                         </div>
                     </div>
                 </div>
@@ -499,7 +544,7 @@
                         <p class="menu-desc">Heart-shaped base with authentic cream cheese frosting. Smooth velvet texture.</p>
                         <div class="menu-footer">
                             <span class="menu-price">₹699 (1/2 kg)</span>
-                            <button class="btn-add" onclick="scrollToForm()">ADD +</button>
+                            <button class="btn-add" onclick="addToCart('Red Velvet Heart', 699)">ADD +</button>
                         </div>
                     </div>
                 </div>
@@ -514,7 +559,7 @@
                         <p class="menu-desc">Messed up? Send this. Written "I am Sorry" on top with a crying emoji. Works 99% of the time.</p>
                         <div class="menu-footer">
                             <span class="menu-price">₹599</span>
-                            <button class="btn-add" onclick="scrollToForm()">ADD +</button>
+                            <button class="btn-add" onclick="addToCart('Sorry Bento Cake', 599)">ADD +</button>
                         </div>
                     </div>
                 </div>
@@ -560,7 +605,6 @@
             </p>
 
             <div class="trust-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); margin-bottom: 3rem;">
-                
                 <div class="trust-card">
                     <div class="trust-icon" style="color:#8b5cf6"><i data-lucide="share-2" size="24"></i></div>
                     <h3 class="trust-title" style="font-size:1rem;">YOUR SECRET WEAPON</h3>
@@ -593,53 +637,6 @@
                     <h3 class="trust-title" style="font-size:1rem;">RESUME BOOST</h3>
                     <p class="trust-desc">
                         Official 'Campus Entrepreneur' Certificate & Letter of Recommendation (LoR) from the Founder.
-                    </p>
-                </div>
-            </div>
-
-            <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; margin-bottom: 3rem;">
-                <h3 class="rajdhani" style="color:#8b5cf6; margin-bottom: 1.5rem; display:flex; align-items:center; gap:10px;">
-                    <i data-lucide="trending-up"></i> CAREER PROGRESSION
-                </h3>
-                
-                <div style="display: flex; flex-direction: column; gap: 1rem;">
-                    <div style="display:flex; align-items:center; gap:15px; border-bottom:1px solid #222; padding-bottom:10px;">
-                        <div style="background:#333; color:#fff; width:40px; height:40px; display:flex; align-items:center; justify-content:center; border-radius:50%; font-weight:bold;">1</div>
-                        <div>
-                            <div style="font-weight:bold; color:#fff;">THE SCOUT (Entry Level)</div>
-                            <div style="font-size:0.8rem; color:#888;">Perk: 10% Discount Code for Friends + 10% Commission.</div>
-                        </div>
-                    </div>
-
-                    <div style="display:flex; align-items:center; gap:15px; border-bottom:1px solid #222; padding-bottom:10px;">
-                        <div style="background:#8b5cf6; color:#fff; width:40px; height:40px; display:flex; align-items:center; justify-content:center; border-radius:50%; font-weight:bold;">2</div>
-                        <div>
-                            <div style="font-weight:bold; color:#8b5cf6;">THE AGENT (10+ Orders)</div>
-                            <div style="font-size:0.8rem; color:#888;">Perk: Commission bumps to 15% + Free Samosa Party Pack.</div>
-                        </div>
-                    </div>
-
-                    <div style="display:flex; align-items:center; gap:15px;">
-                        <div style="background:linear-gradient(45deg, #f59e0b, #b45309); color:#fff; width:40px; height:40px; display:flex; align-items:center; justify-content:center; border-radius:50%; font-weight:bold;">3</div>
-                        <div>
-                            <div style="font-weight:bold; color:#f59e0b;">THE BOSS (50+ Orders)</div>
-                            <div style="font-size:0.8rem; color:#888;">Perk: VIP Event Pass + Official Merchandise + Core Team Offer.</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div style="display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:3rem;">
-                <div style="flex:1; min-width:280px; background:#111; padding:1.5rem; border-radius:10px; border:1px dashed #444;">
-                    <h4 style="color:#fff; margin-bottom:0.5rem;"><i data-lucide="folder-open" style="display:inline; width:16px;"></i> THE ARMORY</h4>
-                    <p style="font-size:0.85rem; color:#888;">
-                        We provide the weapons. You fire them. Access our Google Drive for high-quality Instagram Stories, Reels, and WhatsApp Broadcast scripts.
-                    </p>
-                </div>
-                <div style="flex:1; min-width:280px; background:#111; padding:1.5rem; border-radius:10px; border:1px dashed #444;">
-                    <h4 style="color:#fff; margin-bottom:0.5rem;"><i data-lucide="users" style="display:inline; width:16px;"></i> THE NETWORK</h4>
-                    <p style="font-size:0.85rem; color:#888;">
-                        Join the exclusive "Syndicate" WhatsApp group. Network with the top hustlers of LPU.
                     </p>
                 </div>
             </div>
