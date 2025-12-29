@@ -636,3 +636,75 @@ footer {
 .coupon-section:active {
     transform: scale(0.98);
 }
+
+
+
+
+        /* HTML Specific Overrides for Premium Cards */
+        .ny-card {
+            margin-top: 3rem;
+            position: relative;
+            background: radial-gradient(circle at center, rgba(30, 20, 5, 0.9) 0%, rgba(5, 5, 5, 0.95) 100%);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 20px;
+            padding: 3rem 2rem;
+            text-align: center;
+            overflow: hidden;
+            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.8), 0 0 30px rgba(245, 158, 11, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .ny-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, #f59e0b, transparent);
+            opacity: 0.5;
+        }
+
+        .ny-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to bottom, #fff 0%, #f59e0b 60%, #b45309 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 15px rgba(245, 158, 11, 0.4));
+            line-height: 1.1;
+            letter-spacing: 1px;
+        }
+
+        .ny-subtitle {
+            font-family: 'Dancing Script', cursive;
+            font-size: 1.8rem;
+            color: #d4d4d4;
+            margin-bottom: 2rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        }
+
+        .ny-badge {
+            display: inline-flex; align-items: center; gap: 10px;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid #10b981; color: #10b981;
+            padding: 10px 24px; border-radius: 50px;
+            font-family: 'Rajdhani', sans-serif; font-weight: 700;
+            font-size: 0.9rem; letter-spacing: 1px;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+            transition: transform 0.3s;
+        }
+        .ny-badge:hover {
+            transform: scale(1.05);
+            background: rgba(16, 185, 129, 0.25); color: white;
+        }
+
+        /* Sparkle Animation */
+        .sparkle { position: absolute; color: #f59e0b; font-size: 1.5rem; opacity: 0; animation: floatSparkle 3s ease-in-out infinite; }
+        .s1 { top: 15%; left: 10%; animation-delay: 0s; }
+        .s2 { bottom: 20%; right: 10%; animation-delay: 1.5s; font-size: 2rem; }
+        .s3 { top: 20%; right: 20%; animation-delay: 0.5s; font-size: 1rem; color: #fff; }
+        
+        @keyframes floatSparkle {
+            0% { transform: translateY(0) scale(0.5); opacity: 0; }
+            50% { opacity: 0.8; transform: translateY(-10px) scale(1); }
+            100% { transform: translateY(-20px) scale(0.5); opacity: 0; }
+        }

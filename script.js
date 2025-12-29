@@ -1,7 +1,10 @@
 /* =========================================
    1. SYSTEM INITIALIZATION & CONFIG
    ========================================= */
-lucide.createIcons();
+// Initialize Lucide Icons
+if (typeof lucide !== 'undefined') {
+    lucide.createIcons();
+}
 
 // Project Database
 const projects = {
@@ -43,10 +46,10 @@ const projects = {
     }
 };
 
-// =========================================
-// 2. VIEW CONTROLLER
-// =========================================
-function activateView(pid) {
+/* =========================================
+   2. VIEW CONTROLLER
+   ========================================= */
+function activateView(pid, btnElement) {
     const config = projects[pid];
     if (!config) return;
 
@@ -56,7 +59,7 @@ function activateView(pid) {
     
     const bg = document.getElementById('dynamic-bg');
     if(bg) {
-        bg.style.backgroundImage = `linear-gradient(to bottom, rgba(5,5,5,0.85), rgba(5,5,5,0.95)), ${config.img}`;
+        bg.style.backgroundImage = `linear-gradient(to bottom, rgba(3,3,3,0.9), rgba(3,3,3,0.98)), ${config.img}`;
     }
 
     // 2. Update Hero Text
@@ -68,7 +71,7 @@ function activateView(pid) {
         heroBadge.innerHTML = `<span style="display:inline-block; width:8px; height:8px; background:currentColor; border-radius:50%; margin-right:6px;"></span> ${config.badge}`;
         heroBadge.style.color = config.color;
         heroBadge.style.borderColor = config.color;
-        // Reset specific gradient styles for non-default views if needed
+        
         if(pid === 'p1') {
             heroBadge.style.background = `linear-gradient(90deg, ${config.color}, #d97706)`;
             heroBadge.style.color = '#fff';
@@ -81,8 +84,13 @@ function activateView(pid) {
 
     // 3. Update Dock State
     document.querySelectorAll('.dock-item').forEach(el => el.classList.remove('active'));
-    const tab = document.getElementById('tab-' + pid);
-    if(tab) tab.classList.add('active');
+    // If clicked via dock, highlight that button, else find by ID
+    if(btnElement) {
+        btnElement.classList.add('active');
+    } else {
+        const tab = document.getElementById('tab-' + pid);
+        if(tab) tab.classList.add('active');
+    }
 
     // 4. Switch Panels
     document.querySelectorAll('.view-panel').forEach(el => el.classList.remove('active'));
@@ -91,17 +99,6 @@ function activateView(pid) {
 
     // Scroll to top smoothly
     window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-// =========================================
-// 3. UTILITY & INTERACTION
-// =========================================
-function scrollToForm() { 
-    const activeForm = document.querySelector('.view-panel.active .form-terminal');
-    if(activeForm) {
-        activeForm.scrollIntoView({behavior: 'smooth', block: 'start'});
-        showToast("Loading Secure Form...");
-    }
 }
 
 function showToast(msg) {
@@ -114,33 +111,11 @@ function showToast(msg) {
     }
 }
 
-// =========================================
-// 4. APP POP-UP LOGIC
-// =========================================
-function showAppPopup() {
-    const modal = document.getElementById('app-modal');
-    // Check session storage to see if user closed it previously
-    if(modal && !sessionStorage.getItem('appPopupClosed')) {
-        modal.style.display = 'flex';
-        // Small timeout to allow display:flex to apply before adding opacity class
-        setTimeout(() => modal.classList.add('active'), 50);
-    }
-}
-
-function closeAppModal() {
-    const modal = document.getElementById('app-modal');
-    if(modal) {
-        modal.classList.remove('active');
-        setTimeout(() => modal.style.display = 'none', 400); // Wait for animation
-        sessionStorage.setItem('appPopupClosed', 'true');
-    }
-}
-
-// =========================================
-// 5. LIVE TICKER SYSTEM
-// =========================================
+/* =========================================
+   3. LIVE TICKER SYSTEM
+   ========================================= */
 const msgs = [
-    "🔥 NEW YEAR SALE: Use Code '2026' for instant discount.",
+    "🔥 NEW YEAR SALE: Use Code 'WELCOME10' for instant discount.",
     "⚡ System Status: Instant Delivery Online.",
     "🛵 Order #2891 just delivered to BH-4...",
     "🍰 Simran just pre-booked a Red Velvet Cake...",
@@ -163,59 +138,19 @@ function startTicker() {
     }, 4000);
 }
 
-// =========================================
-// 6. "GOD MODE" COUNTER (Alt + V)
-// =========================================
-const counterEl = document.getElementById('secret-counter');
-const countVal = document.getElementById('view-count-val');
-
-function initCounter() {
-    // Simple Local Storage Counter for demo purposes
-    let hits = localStorage.getItem('site_hits') || 0;
-    hits = parseInt(hits) + 1;
-    localStorage.setItem('site_hits', hits);
-    
-    if(countVal) countVal.innerText = hits;
-}
-
-document.addEventListener('keydown', function(event) {
-    if (event.altKey && (event.key === 'v' || event.key === 'V')) {
-        if(counterEl) {
-            counterEl.style.display = (counterEl.style.display === 'none') ? 'block' : 'none';
-        }
-    }
-});
-
-// =========================================
-// 7. BOOTSTRAP
-// =========================================
-document.addEventListener("DOMContentLoaded", function() {
-    // 1. Lazy Load Images
-    const lazyImages = [].slice.call(document.querySelectorAll("img"));
-    lazyImages.forEach(function(img) { 
-        if(img.complete) img.classList.add('loaded'); 
-        img.onload = function() { img.classList.add('loaded'); } 
-    });
-    
-    // 2. Start Systems
-    activateView('p1'); // Default View
-    startTicker();
-    initCounter();
-
-    // 3. Trigger App Popup (Delay 2s for better UX)
-    setTimeout(showAppPopup, 2000);
-});
-
-
-// =========================================
-// 8. SHOPPING CART & PAYMENT SYSTEM
-// =========================================
-
-// Cart State
+/* =========================================
+   4. SHOPPING CART LOGIC
+   ========================================= */
 let cart = [];
-const RAZORPAY_KEY_ID = 'YOUR_RAZORPAY_KEY_ID'; // <--- PUT YOUR KEY HERE
+
+// ⚠️ IMPORTANT: Replace this with your actual Razorpay Key ID
+// Go to https://dashboard.razorpay.com/app/keys to generate one
+const RAZORPAY_KEY_ID = 'rzp_test_YOUR_ACTUAL_KEY_HERE'; 
 
 function addToCart(name, price) {
+    // Haptic Feedback for Mobile
+    if(navigator.vibrate) navigator.vibrate(50);
+
     // Check if item exists
     const existingItem = cart.find(item => item.name === name);
     if(existingItem) {
@@ -238,7 +173,7 @@ function updateCartUI() {
     const btnTotalEl = document.getElementById('btn-pay-amt');
     const countBadge = document.getElementById('cart-count');
 
-    // 1. Calculate Totals
+    // Calculate Totals
     let total = 0;
     let count = 0;
     cart.forEach(item => {
@@ -246,14 +181,19 @@ function updateCartUI() {
         count += item.qty;
     });
 
-    // 2. Update HTML
-    countBadge.innerText = count;
-    totalEl.innerText = '₹' + total;
-    btnTotalEl.innerText = '₹' + total;
+    // Update HTML elements
+    if(countBadge) countBadge.innerText = count;
+    if(totalEl) totalEl.innerText = '₹' + total;
+    if(btnTotalEl) btnTotalEl.innerText = '₹' + total;
 
-    // 3. Render Items
+    // Render Items
     if(cart.length === 0) {
-        container.innerHTML = '<div class="empty-cart-msg">Your cart is empty. Add some snacks!</div>';
+        container.innerHTML = `
+            <div class="empty-cart-msg">
+                <i data-lucide="shopping-cart" size="40" style="opacity:0.5; margin-bottom:10px;"></i>
+                <p>Your bag is empty.</p>
+            </div>`;
+        lucide.createIcons(); // Re-render icons
         return;
     }
 
@@ -286,9 +226,9 @@ function toggleCart() {
     modal.classList.toggle('active');
 }
 
-// =========================================
-// 9. PAYMENT INTEGRATION
-// =========================================
+/* =========================================
+   5. PAYMENT SYSTEM (RAZORPAY)
+   ========================================= */
 function processPayment() {
     // 1. Validation
     if(cart.length === 0) return showToast("Cart is empty!");
@@ -298,26 +238,26 @@ function processPayment() {
     const hostel = document.getElementById('cust-hostel').value;
     const room = document.getElementById('cust-room').value;
 
-    if(!name || !phone || !room) {
-        alert("Please fill in all delivery details.");
+    if(!name || !phone || !hostel || !room) {
+        alert("Please fill in all delivery details (Name, Phone, Hostel, Room).");
         return;
     }
 
-    // 2. Calculate Total Amount (Razorpay expects amount in paise)
+    // 2. Calculate Total Amount
     let totalAmount = 0;
     cart.forEach(item => totalAmount += (item.price * item.qty));
     
-    // 3. Create Options
+    // 3. Razorpay Options
     var options = {
-        "key": d1GNpp5lXUPICl43XG2D0L6u, 
-        "amount": totalAmount * 100, // Amount in paise
+        "key": "rzp_test_RxVRFb392D9PUh,d1GNpp5lXUPICl43XG2D0L6u", 
+        "amount": totalAmount * 100, // Amount is in paise (₹1 = 100 paise)
         "currency": "INR",
         "name": "Home-Dome",
-        "description": "Snack Order Payment",
+        "description": "Snack Order",
         "image": "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=200&q=80",
         "handler": function (response){
-            // SUCCESS HANDLER
-            console.log(response.razorpay_payment_id);
+            // Success Handler
+            console.log("Payment ID: " + response.razorpay_payment_id);
             paymentSuccess(response.razorpay_payment_id, totalAmount, {name, phone, hostel, room});
         },
         "prefill": {
@@ -326,21 +266,29 @@ function processPayment() {
         },
         "theme": {
             "color": "#f59e0b"
+        },
+        "modal": {
+            "ondismiss": function(){
+                console.log('Payment modal closed');
+            }
         }
     };
 
-    var rzp1 = new Razorpay(options);
-    rzp1.on('payment.failed', function (response){
-        alert("Payment Failed: " + response.error.description);
-    });
-    rzp1.open();
+    try {
+        var rzp1 = new Razorpay(options);
+        rzp1.on('payment.failed', function (response){
+            alert("Payment Failed: " + response.error.description);
+        });
+        rzp1.open();
+    } catch (e) {
+        alert("Payment System Error: Please ensure Razorpay script is loaded.");
+        console.error(e);
+    }
 }
 
 function paymentSuccess(paymentId, amount, details) {
-    // Here you would typically send this data to your backend
-    // Since we are serverless, we will construct a WhatsApp message
-    
-    const orderItems = cart.map(i => `${i.name} x${i.qty}`).join(', ');
+    // Construct Order Summary
+    const orderItems = cart.map(i => `${i.qty}x ${i.name}`).join(', ');
     
     const msg = `*NEW ORDER PAID* ✅%0A` +
                 `*ID:* ${paymentId}%0A` +
@@ -351,62 +299,20 @@ function paymentSuccess(paymentId, amount, details) {
                 `*Loc:* ${details.hostel} - ${details.room}%0A` +
                 `*Phone:* ${details.phone}`;
                 
+    // Clear Cart & Close Modal
     toggleCart();
-    cart = []; // Clear cart
+    cart = []; 
     updateCartUI();
     
-    // Redirect to WhatsApp with Order Details
+    // Redirect to WhatsApp
     window.location.href = `https://wa.me/917297810859?text=${msg}`;
 }
 
-
-// =========================================
-// PROMO POPUP LOGIC
-// =========================================
-
-// Show popup 2 seconds after site loads
+/* =========================================
+   6. UNIFIED SUPER MODAL (Welcome + App)
+   ========================================= */
 window.addEventListener('load', () => {
-    // Check if user has already seen it in this session
-    if (!sessionStorage.getItem('promoSeen')) {
-        setTimeout(() => {
-            const modal = document.getElementById('promo-modal');
-            if(modal) {
-                modal.style.display = 'flex';
-                // Trigger confetti or sound here if desired
-            }WELCOME10
-        }, 2000); // 2000ms = 2 seconds delay
-    }
-});
-
-function closePromo() {
-    const modal = document.getElementById('promo-modal');
-    modal.style.display = 'none';
-    sessionStorage.setItem('promoSeen', 'true'); // Don't show again this session
-}
-
-function copyCode() {
-    const code = document.getElementById('coupon-text').innerText;
-    navigator.clipboard.writeText(code);
-    
-    // UI Feedback
-    const feedback = document.getElementById('copy-feedback');
-    feedback.innerText = "COPIED TO CLIPBOARD!";
-    feedback.style.color = "#10b981"; // Green color
-    
-    // Haptic feedback for mobile
-    if(navigator.vibrate) navigator.vibrate(50);
-}
-
-
-
-
-
-// =========================================
-// UNIFIED POPUP LOGIC
-// =========================================
-
-window.addEventListener('load', () => {
-    // Show after 2.5 seconds if not seen before
+    // Show after 2.5 seconds if not seen before in this session
     if (!sessionStorage.getItem('unifiedModalSeen')) {
         setTimeout(() => {
             const modal = document.getElementById('unified-modal');
@@ -417,26 +323,34 @@ window.addEventListener('load', () => {
             }
         }, 2500); 
     }
+    
+    // Start Ticker
+    startTicker();
 });
 
 function closeUnifiedModal() {
     const modal = document.getElementById('unified-modal');
-    modal.style.display = 'none';
+    if(modal) modal.style.display = 'none';
     sessionStorage.setItem('unifiedModalSeen', 'true');
 }
 
 function copyCode() {
     const code = document.getElementById('coupon-text').innerText;
-    navigator.clipboard.writeText(code);
     
-    // UI Feedback
-    const feedback = document.getElementById('copy-feedback');
-    feedback.innerText = "COPIED TO CLIPBOARD!";
-    feedback.style.color = "#10b981"; // Green color
-    
-    // Animate the box
-    const box = document.querySelector('.coupon-box');
-    box.style.borderColor = "#10b981";
-    
-    if(navigator.vibrate) navigator.vibrate(50);
+    // Modern Clipboard API
+    navigator.clipboard.writeText(code).then(() => {
+        const feedback = document.getElementById('copy-feedback');
+        if(feedback) {
+            feedback.innerText = "COPIED TO CLIPBOARD!";
+            feedback.style.color = "#10b981"; // Green color
+        }
+        
+        // Animate the box border
+        const box = document.querySelector('.coupon-box');
+        if(box) box.style.borderColor = "#10b981";
+        
+        if(navigator.vibrate) navigator.vibrate(50);
+    }).catch(err => {
+        console.error('Failed to copy: ', err);
+    });
 }
