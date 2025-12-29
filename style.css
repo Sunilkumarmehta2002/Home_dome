@@ -464,7 +464,7 @@ footer {
    10. CART & CHECKOUT SYSTEMS
    ========================================= */
 .cart-float {
-    position: fixed; bottom: 20px; right: 20px;
+    position: fixed; bottom: 160px; right: 20px;
     width: 60px; height: 60px;
     background: var(--accent); color: #000;
     border-radius: 50%;
