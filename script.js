@@ -358,3 +358,85 @@ function paymentSuccess(paymentId, amount, details) {
     // Redirect to WhatsApp with Order Details
     window.location.href = `https://wa.me/917297810859?text=${msg}`;
 }
+
+
+// =========================================
+// PROMO POPUP LOGIC
+// =========================================
+
+// Show popup 2 seconds after site loads
+window.addEventListener('load', () => {
+    // Check if user has already seen it in this session
+    if (!sessionStorage.getItem('promoSeen')) {
+        setTimeout(() => {
+            const modal = document.getElementById('promo-modal');
+            if(modal) {
+                modal.style.display = 'flex';
+                // Trigger confetti or sound here if desired
+            }
+        }, 5000); // 2000ms = 2 seconds delay
+    }
+});
+
+function closePromo() {
+    const modal = document.getElementById('promo-modal');
+    modal.style.display = 'none';
+    sessionStorage.setItem('promoSeen', 'true'); // Don't show again this session
+}
+
+function copyCode() {
+    const code = document.getElementById('coupon-text').innerText;
+    navigator.clipboard.writeText(code);
+    
+    // UI Feedback
+    const feedback = document.getElementById('copy-feedback');
+    feedback.innerText = "COPIED TO CLIPBOARD!";
+    feedback.style.color = "#10b981"; // Green color
+    
+    // Haptic feedback for mobile
+    if(navigator.vibrate) navigator.vibrate(50);
+}
+
+
+
+
+
+// =========================================
+// UNIFIED POPUP LOGIC
+// =========================================
+
+window.addEventListener('load', () => {
+    // Show after 2.5 seconds if not seen before
+    if (!sessionStorage.getItem('unifiedModalSeen')) {
+        setTimeout(() => {
+            const modal = document.getElementById('unified-modal');
+            if(modal) {
+                modal.style.display = 'flex';
+                // Trigger simple vibration on mobile
+                if(navigator.vibrate) navigator.vibrate(50);
+            }
+        }, 2500); 
+    }
+});
+
+function closeUnifiedModal() {
+    const modal = document.getElementById('unified-modal');
+    modal.style.display = 'none';
+    sessionStorage.setItem('unifiedModalSeen', 'true');
+}
+
+function copyCode() {
+    const code = document.getElementById('coupon-text').innerText;
+    navigator.clipboard.writeText(code);
+    
+    // UI Feedback
+    const feedback = document.getElementById('copy-feedback');
+    feedback.innerText = "COPIED TO CLIPBOARD!";
+    feedback.style.color = "#10b981"; // Green color
+    
+    // Animate the box
+    const box = document.querySelector('.coupon-box');
+    box.style.borderColor = "#10b981";
+    
+    if(navigator.vibrate) navigator.vibrate(50);
+}

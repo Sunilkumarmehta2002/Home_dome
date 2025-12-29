@@ -93,6 +93,67 @@
 </head>
 <body>
 
+
+
+    <div id="unified-modal" class="promo-overlay">
+    <div class="promo-card">
+        <button class="close-promo" onclick="closeUnifiedModal()">×</button>
+        
+        <div class="promo-icon-box">
+            <i data-lucide="gift" size="32"></i>
+        </div>
+        <h3 class="rajdhani">WELCOME GIFT UNLOCKED</h3>
+        <p>Get flat <strong>10% OFF</strong> on your first order.</p>
+        
+        <div class="coupon-section" style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px dashed var(--accent); margin-bottom: 20px;">
+            <div style="font-size: 0.75rem; color: #888; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">Tap to copy code</div>
+            <div class="coupon-box" onclick="copyCode()" style="margin-bottom: 5px;">
+                <span id="coupon-text">WELCOME10</span>
+                <i data-lucide="copy" size="16"></i>
+            </div>
+            <div id="copy-feedback" style="margin-bottom: 0;"></div>
+        </div>
+
+        <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; margin-top: 10px;">
+            <p style="font-size: 0.9rem; color: #fff; margin-bottom: 15px; display:flex; align-items:center; justify-content:center; gap:8px;">
+                <i data-lucide="zap" size="16" style="color:var(--accent); fill:var(--accent);"></i>
+                <strong>Want Live Tracking?</strong>
+            </p>
+            
+            <a href="https://median.co/share/lppardl#apk" target="_blank" class="btn-claim" style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                <i data-lucide="smartphone" size="20"></i> INSTALL APP
+            </a>
+            
+            <div style="font-size: 0.7rem; color: #555; margin-top: 10px; text-transform: uppercase;">
+                Secure Android Download • v1.0.4
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- <div id="promo-modal" class="promo-overlay">
+    <div class="promo-card">
+        <button class="close-promo" onclick="closePromo()">×</button>
+        <div class="promo-icon-box">
+            <i data-lucide="gift" size="32"></i>
+        </div>
+        <h3 class="rajdhani">WELCOME GIFT</h3>
+        <p>Get flat <strong>10% OFF</strong> on your first instant order today.</p>
+        
+        <div class="coupon-box" onclick="copyCode()">
+            <span id="coupon-text">WELCOME10</span>
+            <i data-lucide="copy" size="16"></i>
+        </div>
+        <div id="copy-feedback">Click to Copy</div>
+
+        <button class="btn-claim" onclick="closePromo()">START ORDERING</button>
+    </div>
+</div>
+
+
+
+
     <div id="app-modal" class="app-modal-overlay">
         <div class="app-modal">
             <button class="app-close" onclick="closeAppModal()">×</button>
@@ -118,7 +179,7 @@
                 Secure Download • Version 1.0.4
             </div>
         </div>
-    </div>
+    </div> -->
 
     <div id="secret-counter" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:rgba(0,0,0,0.95); border:2px solid #0f0; padding:20px; z-index:9999; border-radius:10px; text-align:center; font-family:'Orbitron'; box-shadow: 0 0 30px #0f0;">
         <div style="color:#0f0; font-size:1.5rem; margin-bottom:10px;">ADMIN CONSOLE</div>
@@ -166,18 +227,18 @@
                 <div class="row-inputs">
                     <div class="input-group">
                         <select id="cust-hostel">
-                            <option value="" disabled selected>Select Hostel</option>
-                            <option value="BH1">BH 1</option>
-                            <option value="BH2">BH 2</option>
-                            <option value="BH3">BH 3</option>
-                            <option value="BH4">BH 4</option>
-                            <option value="GH">GH (Girls Hostel)</option>
-                            <option value="LAW_GATE">Law Gate Pickup</option>
+                            <option value="" disabled selected>Select Location</option>
+                            <option value="LAW_GATE">Law Gate </option>
+                            <option value="LPU_MAIN_GATE_1">LPU Main gate 1</option>
+                            <option value="LPU_LAW_GATE_2">LPU Law gate 2</option>
+                            <option value="PHAGWARA">Phagwara</option>
+                            <option value="JALANDHAR">Jalandhar</option>
+                            
                         </select>
                     </div>
                     <div class="input-group">
                         <input type="text" id="cust-room" placeholder=" " required>
-                        <label>Room No.</label>
+                        <label>Location.</label>
                     </div>
                 </div>
             </div>
