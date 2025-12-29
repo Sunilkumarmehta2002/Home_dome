@@ -373,8 +373,8 @@ window.addEventListener('load', () => {
             if(modal) {
                 modal.style.display = 'flex';
                 // Trigger confetti or sound here if desired
-            }
-        }, 5000); // 2000ms = 2 seconds delay
+            }WELCOME10
+        }, 2000); // 2000ms = 2 seconds delay
     }
 });
 
